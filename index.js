@@ -28,15 +28,17 @@ const urls = [];
 app.post('/api/shorturl', (req, res) => {
   const inputUrl = req.body.url;
 
+  let urlObject;
   try {
-    new URL(inputUrl);
-  } catch {
+    urlObject = new URL(inputUrl);
+  } catch (e) {
+    return res.json({ error: 'invalid url' });
+  }
+  if (urlObject.protocol !== 'http:' && urlObject.protocol !== 'https:') {
     return res.json({ error: 'invalid url' });
   }
 
-  const hostname = urlParser.parse(inputUrl).hostname;
-
-  dns.lookup(hostname, (err) => {
+  dns.lookup(urlObject.hostname, (err, address) => {
     if (err) {
       return res.json({ error: 'invalid url' });
     }
